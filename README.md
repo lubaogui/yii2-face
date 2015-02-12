@@ -28,4 +28,8 @@ Usage
 Once the extension is installed, simply use it in your code by  :
 
 ```php
-<?= \lubaogui\face\AutoloadExample::widget(); ?>```
+
+use lubaogui\face\FaceRepository;
+
+$faceRepo = new FaceRepository();
+$faceRepo->saveFace($images);
