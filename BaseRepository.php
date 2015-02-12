@@ -22,6 +22,13 @@ class BaseRepository extends \yii\base\Object;
     //检索库id
     public $dbid = 0;
 
+    //错误信息编码
+    private $_errorNo = 0;
+
+    //错误信息内容
+    private $_errorMsg = '';
+    
+
     /**
      * 保存上传的头像照片信息
      *
@@ -56,7 +63,7 @@ class BaseRepository extends \yii\base\Object;
     public function searchByImage($reposType, $photoPath, &$result) {
 
         $postData = [];
-        $postData['type'] = $this->type;
+        $postData['type'] = $reposType;
         $postData['encoding'] = $this->encoding;
         $postData['image'] = base64_encode(file_get_contents($photoPath));
         $result =  $this->sendRequest($postData);
@@ -66,10 +73,10 @@ class BaseRepository extends \yii\base\Object;
     /**
      * 删除照片信息(从头像检索库中删除，通常发生在家属确认人员找到之后)
      *
-     * @param integer $faceId 人脸信息的唯一标示 
+     * @param array $images 人脸信息的唯一标示,支持批量数组提交 
      * @return bollen  是否成功保存图片
      */
-    public function deleteFace($images) {
+    public function deleteImage($images) {
 
         $postData = [];
         $postData['type'] = $this->type;
@@ -78,7 +85,8 @@ class BaseRepository extends \yii\base\Object;
            $images[$key]['dbid'] = $this->dbid; 
         }
         $postData['param'] = json_encode($images);
-        $result =  $this->sendRequest($postData);
+        $result = $this->sendRequest($postData);
+        return $result;
 
     }
 
@@ -107,6 +115,7 @@ class BaseRepository extends \yii\base\Object;
         curl_setopt_array($curl, $options);
         $output = curl_exec($curl);
         if ($output === false) {
+            /*
             throw new Exception('request failed: ' . curl_errno($curl) . ' - ' . curl_error($curl), [
                 'requestMethod' => $method,
                 'requestUrl' => $url,
@@ -114,11 +123,58 @@ class BaseRepository extends \yii\base\Object;
                 'responseHeaders' => $headers,
                 'responseBody' => $this->decodeErrorBody($body),
             ]);
+             */
+            $this->setError(curl_errorno($curl), curl_error($curl)) ;
+            return false;
         }
         else {
             #$responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             curl_close($curl);
+            $output = json_decode($output);
+
+            //json解析失败，则设置错误并返回
+            if (empty($output)) {
+                $this->setError(100001, 'json_decode of the return output failed!');
+                return false;
+            }
+
+            if ($output['errno']) {
+                $this->setError($output['errno'], $output['errmas']);
+                return false;
+
+            }
             return $output;
         }
     }
-}
+
+    /**
+     * 设置错误信息 
+     *
+     * @param int $errorNo 错误编号.
+     * @param string $errorMsg 错误信息.
+     * @param reference of array  &$result  保存返回结果的对象指针 
+     */
+    protected function setError($errorNo, $errorMsg) {
+        $this->_errorNo = $errorNo;
+        $this->_errorMsg = $errorMsg;
+    }
+
+    /**
+     * 获取错误编码信息 
+     *
+     * @return int 错误编码
+     */
+    public function getErrorNo() {
+        return $this->_errorNo;
+    }
+
+    /**
+     * 获取错误编码信息 
+     *
+     * @return string  错误信息
+     */
+    public function getErrorMsg() {
+        return $this->_errorMsg;
+    }
+
+}   

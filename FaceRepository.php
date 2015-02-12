@@ -14,13 +14,12 @@ class FaceRepository extends BaseRepository;
     public $maxFileSize = 0;
 
     /**
-     * Initializes the application component.
+     * 初始化应用组件和变量.
      */
     public function init()
     {
         parent::init();
-
-        $this->dbid = 2021;
+        $this->dbid = 2020;
     }
 
     /**
@@ -30,8 +29,8 @@ class FaceRepository extends BaseRepository;
      * @return bollen  是否成功保存图片
      */
     public function saveFace($images) {
-        $this->type = 'st_ruku_indexgen';
-        $this->saveImage();
+        $type = 'st_ruku_indexgen';
+        return $this->saveImage($type, $images);
     }
 
     /**
@@ -42,7 +41,13 @@ class FaceRepository extends BaseRepository;
      * @return bollen  是否成功保存图片
      */
     public function searchByPhoto($photo, &$result) {
-        $this->type = 'st_visplat_search_'.$this->dbid;
+        $type = 'st_visplat_search_'.$this->dbid;
+        if ($this->searchByImage($type, $photo, $result)) {
+            return true;
+        }
+        else {
+            return false;
+        }
     }
 
     /**
@@ -51,10 +56,8 @@ class FaceRepository extends BaseRepository;
      * @param integer $faceId 人脸信息的唯一标示 
      * @return bollen  是否成功保存图片
      */
-    public function deleteFace($image) {
-
-
-
-
+    public function deleteFace($images) {
+        $this->type = 'st_ruku_indexgen';
+        $this->deleteImage($images);
     }
 }
