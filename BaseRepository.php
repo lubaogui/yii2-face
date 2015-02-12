@@ -7,8 +7,8 @@ namespace lubaogui\face;
  */
 class BaseRepository extends \yii\base\Object;
 {
-    //头像库url地址
-    public $faceReposUrl = '';
+    //图片库url地址
+    public $reposUrl = '';
 
     //图片的最大大小限制,0表示无限制
     public $maxFileSize = 0;
@@ -111,7 +111,7 @@ class BaseRepository extends \yii\base\Object;
             ];
 
         //使用curl提交请求
-        $curl = curl_init($url);
+        $curl = curl_init($this->reposUrl);
         curl_setopt_array($curl, $options);
         $output = curl_exec($curl);
         if ($output === false) {
