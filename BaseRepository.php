@@ -1,36 +1,56 @@
 <?php
 
+/*
+ * 寻人项目后端和IDL图片库交互类基类, 该类不允许直接被实例化，通过子类实例化
+ * 
+ * Author: 吕宝贵 
+ *
+ */
+
+
 namespace lubaogui\face;
 
 /**
- * This is just an example.
+ * BaseRepository类是和IDL后台服务交互的基类，主要完成图片请求的入库，检索和删除请求的底层实现 
+ *
  */
-class BaseRepository extends \yii\base\Object;
+abstract class BaseRepository extends \yii\base\Object;
 {
+
+    //错误代码设置
+    const PARAM_MISSING = 1001;
+    const PARAM_ILEGAL = 1002;
+    const SERVICE_REQUEST_FAILED = 2001;
+    const APPLICATION_ERROR = 3001;
+
+    //动作常量设置
+    const ACTION_ADD = 'add';
+    const ACTION_DELETE = 'delete';
+
     //图片库url地址
-    public $reposUrl = '';
+    public $reposUrl;
 
     //图片的最大大小限制,0表示无限制
     public $maxFileSize = 0;
 
-    //请求动作
-    public $action = '';
+    //请求动作 
+    public $action;
 
-    //图片编码方式
+    //图片编码方式,默认为1，base64编码方式
     public $encoding = 1;
 
     //检索库id
-    public $dbid = 0;
+    public $dbid;
 
-    //错误信息编码
+    //错误信息编码,0为默认值代表无错误
     private $_errorNo = 0;
 
     //错误信息内容
     private $_errorMsg = '';
-    
+
 
     /**
-     * 保存上传的头像照片信息
+     * 入库保存上传的图片
      *
      * @param string $type 请求类型.
      * @param array $params   一组图片信息
@@ -39,7 +59,7 @@ class BaseRepository extends \yii\base\Object;
     public function saveImage($type, $images) {
 
         $postData = [];
-        $postData['action'] = 'add';
+        $postData['action'] = self::ACTION_ADD;
         $postData['type'] = $type;
         //添加dbid参数
         foreach ($images as $key=>$image) {
@@ -53,10 +73,10 @@ class BaseRepository extends \yii\base\Object;
     }
 
     /**
-     * 根据提交的图片查找对应检索库中相似的图片信息 
+     * 根据提交的图片检索图片库中存在的相似图片 
      *
-     * @param string $reposType 检索库的类型.
-     * @param string $photoPath 提交照片的路径.
+     * @param string $reposType 检索库的类型,参数由IDL服务提供.
+     * @param string $photoPath 提交照片的本地路径.
      * @param reference of array  &$result  保存返回结果的对象指针 
      * @return bollen  是否检索成功
      */
@@ -65,24 +85,37 @@ class BaseRepository extends \yii\base\Object;
         $postData = [];
         $postData['type'] = $reposType;
         $postData['encoding'] = $this->encoding;
-        $postData['image'] = base64_encode(file_get_contents($photoPath));
+        if (file_exists($photoPath)) {
+            $postData['image'] = base64_encode(file_get_contents($photoPath));
+        }
+        else {
+            $this->setError('file does not exist!', self::PARAM_ILEGAL );
+            return false;
+        }
         $result =  $this->sendRequest($postData);
+        if ($result === false) {
+            return false;
+        }
+        else {
+            return true;
+        }
 
     }
 
     /**
      * 删除照片信息(从头像检索库中删除，通常发生在家属确认人员找到之后)
      *
-     * @param array $images 人脸信息的唯一标示,支持批量数组提交 
+     * @param string $type  由IDL服务提供的类型参数，固定且必须 
+     * @param array $images 人脸信息的唯一标识,支持批量数组提交 
      * @return bollen  是否成功保存图片
      */
-    public function deleteImage($images) {
+    public function deleteImage($type, $images) {
 
         $postData = [];
-        $postData['type'] = $this->type;
-        $postData['action'] = 'delete';
-        foreach ($images as $key=>$image) {
-           $images[$key]['dbid'] = $this->dbid; 
+        $postData['type'] = $type;
+        $postData['action'] = self::ACTION_DELETE;
+        foreach ($images as $key => $image) {
+            $images[$key]['dbid'] = $this->dbid; 
         }
         $postData['param'] = json_encode($images);
         $result = $this->sendRequest($postData);
@@ -90,24 +123,24 @@ class BaseRepository extends \yii\base\Object;
 
     }
 
-}    /**
-     * 向后端发送请求 
+    /**
+     * 向后端发送图片入库或者检索请求 
      *
-     * @param array reference $postData post数组 
-     * @return bollen  是否成功保存图片
+     * @param array reference $postData 请求信息数组 
+     * @return bollen 请求是否成功 
      */
-    protected function sendRequest(&$postData) {
+    private function sendRequest(&$postData) {
 
         $postStr = '';
         foreach ($postData as $key=>$value) {
             $postStr .= "{$key}=".urlencode($value)."&";
         }
 
-        //请求的选项，固定格式
+        //请求的选项数组，固定格式
         $options = [
-            'CURLOPT_POST'=>1,
-            'CURLOPT_RETURNTRANSFER'=>1,
-            'CURLOPT_POSTFIELDS'=>$postStr
+            'CURLOPT_POST' => 1,
+            'CURLOPT_RETURNTRANSFER' => true,
+            'CURLOPT_POSTFIELDS' => $postStr
             ];
 
         //使用curl提交请求
@@ -115,33 +148,23 @@ class BaseRepository extends \yii\base\Object;
         curl_setopt_array($curl, $options);
         $output = curl_exec($curl);
         if ($output === false) {
-            /*
-            throw new Exception('request failed: ' . curl_errno($curl) . ' - ' . curl_error($curl), [
-                'requestMethod' => $method,
-                'requestUrl' => $url,
-                'requestBody' => $requestBody,
-                'responseHeaders' => $headers,
-                'responseBody' => $this->decodeErrorBody($body),
-            ]);
-             */
-            $this->setError(curl_errorno($curl), curl_error($curl)) ;
+            $this->setError(curl_errno($curl), curl_error($curl)) ;
             return false;
         }
         else {
-            #$responseCode = curl_getinfo($curl, CURLINFO_HTTP_CODE);
             curl_close($curl);
             $output = json_decode($output);
 
             //json解析失败，则设置错误并返回
             if (empty($output)) {
-                $this->setError(100001, 'json_decode of the return output failed!');
+                $this->setError(self::SERVICE_REQUEST_FAILED, 'json_decode of the return output failed!');
                 return false;
             }
 
+            //第三方服务返回错误信息
             if ($output['errno']) {
-                $this->setError($output['errno'], $output['errmas']);
+                $this->setError(self::SERVICE_REQUEST_FAILED, $output['errno'].':'.$output['errmas']);
                 return false;
-
             }
             return $output;
         }
@@ -152,7 +175,7 @@ class BaseRepository extends \yii\base\Object;
      *
      * @param int $errorNo 错误编号.
      * @param string $errorMsg 错误信息.
-     * @param reference of array  &$result  保存返回结果的对象指针 
+     * @return 无返回信息
      */
     protected function setError($errorNo, $errorMsg) {
         $this->_errorNo = $errorNo;
@@ -160,7 +183,7 @@ class BaseRepository extends \yii\base\Object;
     }
 
     /**
-     * 获取错误编码信息 
+     * 获取错误编码信息, 当返回错误时，可以通过getErrorNo和getErrorMsg组合查出具体的错误信息 
      *
      * @return int 错误编码
      */
@@ -169,7 +192,7 @@ class BaseRepository extends \yii\base\Object;
     }
 
     /**
-     * 获取错误编码信息 
+     * 获取错误详细信息 
      *
      * @return string  错误信息
      */

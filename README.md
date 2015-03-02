@@ -32,4 +32,17 @@ Once the extension is installed, simply use it in your code by  :
 use lubaogui\face\FaceRepository;
 
 $faceRepo = new FaceRepository();
+//create image array or single image, image column should be the content of the image file
+$images = [
+    
+    'item01'=> [
+        'targetid'=>xxx,
+        'callback'=>xxx,
+        'overrite'=>0|1,
+        'image'=>file_content,
+    ],
+
+];
+//save images to face repository
 $faceRepo->saveFace($images);
+
