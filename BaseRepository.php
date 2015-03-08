@@ -164,7 +164,7 @@ abstract class BaseRepository extends \yii\base\Object
         }
         else {
             curl_close($curl);
-            $output = json_decode($output);
+            $output = json_decode($output, true);
 
             //json解析失败，则设置错误并返回
             if (empty($output)) {
