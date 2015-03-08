@@ -149,9 +149,9 @@ abstract class BaseRepository extends \yii\base\Object
 
         //请求的选项数组，固定格式
         $options = [
-            'CURLOPT_POST' => 1,
-            'CURLOPT_RETURNTRANSFER' => true,
-            'CURLOPT_POSTFIELDS' => $postStr
+            CURLOPT_POST => 1,
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_POSTFIELDS => $postStr
             ];
 
         //使用curl提交请求
