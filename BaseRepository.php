@@ -14,7 +14,7 @@ namespace lubaogui\face;
  * BaseRepository类是和IDL后台服务交互的基类，主要完成图片请求的入库，检索和删除请求的底层实现 
  *
  */
-abstract class BaseRepository extends \yii\base\Object;
+abstract class BaseRepository extends \yii\base\Object
 {
 
     //错误代码设置
