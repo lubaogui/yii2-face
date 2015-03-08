@@ -2,6 +2,8 @@
 
 namespace lubaogui\face;
 
+use Yii;
+
 /**
  * 人脸信息库操作类，完成人脸信息库的图片添加，检索和删除 
  */
