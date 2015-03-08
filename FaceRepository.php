@@ -21,10 +21,10 @@ class FaceRepository extends BaseRepository;
     /**
      * 保存人脸图片到人脸信息库
      *
-     * @param array $images 本地路径或者需要上传到人脸信息库的图片绝对路径.
+     * @param array $images 本地路径或者需要上传到人脸信息库的图片url地址. ['unique_id'=>$url, 'item02'=>$url2]
      * @return bollen  是否成功保存图片
      */
-    public function saveFace($images) {
+    public function saveFaces($images) {
         $type = 'st_ruku_indexgen';
         return $this->saveImage($type, $images);
     }
@@ -51,7 +51,7 @@ class FaceRepository extends BaseRepository;
     /**
      * 删除照片信息(从头像检索库中删除，通常发生在家属确认人员找到之后)
      *
-     * @param array $images 标识人脸的信息数组 
+     * @param array $images 标识人脸的信息数组 [['unique_id'=>http://xxxx.com/abc.jpg']]
      * @return bollen  是否成功删除
      */
     public function deleteFace($images) {

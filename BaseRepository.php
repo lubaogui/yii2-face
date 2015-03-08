@@ -42,6 +42,9 @@ abstract class BaseRepository extends \yii\base\Object;
     //检索库id
     public $dbid;
 
+    //相同图片是否采用覆盖策略, 默认覆盖
+    public $overwrite = 1;
+
     //错误信息编码,0为默认值代表无错误
     private $_errorNo = 0;
 
@@ -52,23 +55,27 @@ abstract class BaseRepository extends \yii\base\Object;
     /**
      * 入库保存上传的图片
      *
-     * @param string $type 请求类型.
-     * @param array $params   一组图片信息
-     * @return bollen  是否成功保存图片
+     * @param string $type 请求类型.该值由IDL提供,具体咨询IDL接口人
+     * @param array $imageUrls  可抓取的图片url数组,键为应用中图片唯一标识id, 值为可抓取的图片url地址
+     * @return bollen  是否成功保存
      */
-    public function saveImage($type, $images) {
+    public function saveImage($type, $imageUrls) {
 
         $postData = [];
         $postData['action'] = self::ACTION_ADD;
         $postData['type'] = $type;
-        //添加dbid参数
-        foreach ($images as $key=>$image) {
-            $images[$key]['dbid'] = $this->dbid;
-            //参数相同则覆盖原图片
-            $images[$key]['overwrite'] = 1;
-        }
-        $postData['param'] = json_encode($images);
 
+        //构造idl库需要的图片组织形式
+        $images = [];
+        foreach ($imageUrls as $imageId=>$imageUrl) {
+            $images[$imageUrl]['unique_id'] = $imageId;
+            $images[$imageUrl]['dbid'] = $this->dbid;
+            //相同图片采用覆盖策略
+            $images[$imageUrl]['overwrite'] = $this->overwrite;
+            $images[$imageUrl]['callback'] = '';
+        }
+
+        $postData['param'] = json_encode($images);
         return $this->sendRequest($postData);
     }
 
@@ -106,17 +113,21 @@ abstract class BaseRepository extends \yii\base\Object;
      * 删除照片信息(从头像检索库中删除，通常发生在家属确认人员找到之后)
      *
      * @param string $type  由IDL服务提供的类型参数，固定且必须 
-     * @param array $images 人脸信息的唯一标识,支持批量数组提交 
+     * @param array $imageUrls 人脸信息的唯一标识,支持批量数组提交  [['unique_id'=>$url]]
      * @return bollen  是否成功保存图片
      */
-    public function deleteImage($type, $images) {
+    public function deleteImage($type, $imageUrls) {
 
         $postData = [];
         $postData['type'] = $type;
         $postData['action'] = self::ACTION_DELETE;
-        foreach ($images as $key => $image) {
-            $images[$key]['dbid'] = $this->dbid; 
+
+        $images = [];
+        foreach ($imageUrls as $imageId => $imageUrl) {
+            $images[$imageUrl]['dbid'] = $this->dbid; 
+            $images[$imageUrl]['unique_id'] = $imageId; 
         }
+
         $postData['param'] = json_encode($images);
         $result = $this->sendRequest($postData);
         return $result;

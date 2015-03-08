@@ -35,7 +35,7 @@ $faceRepo = new FaceRepository();
 //create image array or single image, image column should be the content of the image file
 $images = [
     
-    'item01'=> [
+    'url'=> [
         'targetid'=>xxx,
         'callback'=>xxx,
         'overrite'=>0|1,
