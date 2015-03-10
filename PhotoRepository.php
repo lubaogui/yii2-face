@@ -7,7 +7,7 @@ use Yii;
 /**
  * 人脸信息库操作类，完成人脸信息库的图片添加，检索和删除 
  */
-class FaceRepository extends BaseRepository
+class PhotoRepository extends BaseRepository
 {
 
     /**
@@ -16,8 +16,8 @@ class FaceRepository extends BaseRepository
     public function init()
     {
         parent::init();
-        $this->dbid = Yii::$app->params['faceRepos']['dbid'];
-        $this->reposUrl = Yii::$app->params['faceRepos']['reposUrl'];
+        $this->dbid = Yii::$app->params['photoRepos']['dbid'];
+        $this->reposUrl = Yii::$app->params['photoRepos']['reposUrl'];
     }
 
     /**
@@ -26,7 +26,7 @@ class FaceRepository extends BaseRepository
      * @param array $images 本地路径或者需要上传到人脸信息库的图片url地址. ['unique_id'=>$url, 'item02'=>$url2]
      * @return bollen  是否成功保存图片
      */
-    public function saveFaces($images) {
+    public function savePhotos($images) {
         $type = 'st_ruku_indexgen';
         return $this->saveImage($type, $images);
     }
@@ -38,7 +38,7 @@ class FaceRepository extends BaseRepository
      * @param reference of array &$result  返回的相似图片组 
      * @return bollen 检索是否成功 
      */
-    public function searchByPhoto($photo, &$result) {
+    public function searchByFace($photo, &$result) {
         //类型数据由IDL提供,可咨询接口人员获取
         $type = 'st_visplat_search_'.$this->dbid;
         //基类进行$photo文件的存在性判断并检索图片库中是否存在相似人脸
@@ -56,7 +56,7 @@ class FaceRepository extends BaseRepository
      * @param array $images 标识人脸的信息数组 [['unique_id'=>http://xxxx.com/abc.jpg']]
      * @return bollen  是否成功删除
      */
-    public function deleteFace($images) {
+    public function deletePhoto($images) {
         $type = 'st_ruku_indexgen';
         return $this->deleteImage($type, $images);
     }
