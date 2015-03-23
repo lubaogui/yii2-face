@@ -99,13 +99,7 @@ abstract class BaseRepository extends \yii\base\Object
             $this->setError('file does not exist!', self::PARAM_ILEGAL );
             return false;
         }
-        $result =  $this->sendRequest($postData);
-        if ($result === false) {
-            return false;
-        }
-        else {
-            return true;
-        }
+        return $this->sendRequest($postData);
 
     }
 
