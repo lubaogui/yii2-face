@@ -34,7 +34,7 @@ class FaceRepository extends BaseRepository
     /**
      * 根据提交的照片返回检索库中的相似照片 
      *
-     * @param array $photo    图片的绝对路径 
+     * @param array $photo   图片的绝对路径 
      * @param reference of array &$result  返回的相似图片组 
      * @return bollen 检索是否成功 
      */

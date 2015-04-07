@@ -99,7 +99,8 @@ abstract class BaseRepository extends \yii\base\Object
             $this->setError('file does not exist!', self::PARAM_ILEGAL );
             return false;
         }
-        return $this->sendRequest($postData);
+        $result = $this->sendRequest($postData);
+        return true;
 
     }
 
@@ -138,7 +139,12 @@ abstract class BaseRepository extends \yii\base\Object
 
         $postStr = '';
         foreach ($postData as $key=>$value) {
-            $postStr .= "{$key}=".urlencode($value)."&";
+            if ($key == 'image') {
+                $postStr .= "{$key}=".$value."&";
+            }
+            else {
+                $postStr .= "{$key}=".urlencode($value)."&";
+            }
         }
 
         //请求的选项数组，固定格式
@@ -158,7 +164,14 @@ abstract class BaseRepository extends \yii\base\Object
         }
         else {
             curl_close($curl);
-            $output = json_decode($output, true);
+            if (empty($output)) {
+                $output['errno'] = 0;
+                $output['errmas'] = '';
+                $output['ret'] = [];
+            }
+            else {
+                $output = json_decode($output, true);
+            }
 
             //json解析失败，则设置错误并返回
             if (empty($output)) {
