@@ -203,7 +203,7 @@ abstract class BaseRepository extends \yii\base\Object
      * @param string $errorMsg 错误信息.
      * @return 无返回信息
      */
-    protected function setError($errorNo, $errorMsg) {
+    protected function setError($errorMsg, $errorNo) {
         $this->_errorNo = $errorNo;
         $this->_errorMsg = $errorMsg;
     }
