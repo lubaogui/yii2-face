@@ -100,6 +100,14 @@ abstract class BaseRepository extends \yii\base\Object
             return false;
         }
         $result = $this->sendRequest($postData);
+        $resultArray = json_decode($result, true);
+        if (!$resultArray || $resultArray['errno']!=0) {
+            $this->setError('idl return error!', self::PARAM_ILEGAL );
+            return false;
+        }
+        else {
+            $result = $resultArray['ret'];
+        }
         return true;
 
     }
