@@ -40,7 +40,7 @@ class FaceRepository extends BaseRepository
      */
     public function searchByPhoto($photo, &$result) {
         //类型数据由IDL提供,可咨询接口人员获取
-        $type = 'st_visplat_search_ '. $this->dbid;
+        $type = 'st_visplat_search_' . $this->dbid;
         //基类进行$photo文件的存在性判断并检索图片库中是否存在相似人脸
         if ($this->searchByImage($type, $photo, $result)) {
             return true;

@@ -10,6 +10,8 @@
 
 namespace lubaogui\face;
 
+use Yii;
+
 /**
  * BaseRepository类是和IDL后台服务交互的基类，主要完成图片请求的入库，检索和删除请求的底层实现 
  *
@@ -100,13 +102,12 @@ abstract class BaseRepository extends \yii\base\Object
             return false;
         }
         $result = $this->sendRequest($postData);
-        $resultArray = json_decode($result, true);
-        if (!$resultArray || $resultArray['errno']!=0) {
+        if ($result['errno']!=0) {
             $this->setError('idl return error! return is:' . $result, self::PARAM_ILEGAL );
             return false;
         }
         else {
-            $result = $resultArray['ret'];
+            $result = $result['ret'];
         }
         return true;
 
