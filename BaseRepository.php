@@ -184,13 +184,13 @@ abstract class BaseRepository extends \yii\base\Object
 
             //json解析失败，则设置错误并返回
             if (empty($output)) {
-                $this->setError(self::SERVICE_REQUEST_FAILED, 'json_decode of the return output failed!');
+                $this->setError('json_decode of the return output failed!', self::SERVICE_REQUEST_FAILED);
                 return false;
             }
 
             //第三方服务返回错误信息
             if ($output['errno']) {
-                $this->setError(self::SERVICE_REQUEST_FAILED, $output['errno'].':'.$output['errmas']);
+                $this->setError($output['errno'].':'.$output['errmas'], self::SERVICE_REQUEST_FAILED);
                 return false;
             }
             return $output;
