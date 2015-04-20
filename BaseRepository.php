@@ -69,7 +69,7 @@ abstract class BaseRepository extends \yii\base\Object
 
         //构造idl库需要的图片组织形式
         $images = [];
-        foreach ($imageUrls as $imageId=>$imageUrl) {
+        foreach ($imageUrls as $imageId => $imageUrl) {
             $images[$imageUrl]['unique_id'] = $imageId;
             $images[$imageUrl]['dbid'] = $this->dbid;
             //相同图片采用覆盖策略
@@ -102,7 +102,7 @@ abstract class BaseRepository extends \yii\base\Object
             return false;
         }
         $result = $this->sendRequest($postData);
-        if ($result['errno']!=0) {
+        if ($result['errno'] != 0) {
             $this->setError('idl return error! return is:' . $result, self::PARAM_ILEGAL );
             return false;
         }
@@ -147,12 +147,12 @@ abstract class BaseRepository extends \yii\base\Object
     private function sendRequest(&$postData) {
 
         $postStr = '';
-        foreach ($postData as $key=>$value) {
+        foreach ($postData as $key => $value) {
             if ($key == 'image') {
-                $postStr .= "{$key}=".$value."&";
+                $postStr .= "{$key}=" . $value . "&";
             }
             else {
-                $postStr .= "{$key}=".urlencode($value)."&";
+                $postStr .= "{$key}=" . urlencode($value) . "&";
             }
         }
 
@@ -190,7 +190,7 @@ abstract class BaseRepository extends \yii\base\Object
 
             //第三方服务返回错误信息
             if ($output['errno']) {
-                $this->setError($output['errno'].':'.$output['errmas'], self::SERVICE_REQUEST_FAILED);
+                $this->setError($output['errno'] . ':' . $output['errmas'], self::SERVICE_REQUEST_FAILED);
                 return false;
             }
             return $output;
