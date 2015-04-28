@@ -44,5 +44,13 @@ $images = [
 
 ];
 //save images to face repository
-$faceRepo->saveFace($images);
+$faceRepo->saveImages($images);
 
+
+//query image 
+
+$result = [];
+$image = '@webroot/images/xxxx.jpg'; 
+$faceRepo->searchByImage($image, $result);
+
+//search result will passed to $result
