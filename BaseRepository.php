@@ -172,10 +172,10 @@ abstract class BaseRepository extends \yii\base\Object
     /**
      * 向后端发送图片入库或者检索请求 
      *
-     * @param array reference $postData 请求信息数组 
+     * @param array $postData 请求信息数组 
      * @return boolen | array 请求是否成功,不成功返回false,成功返回结果数组
      */
-    private function sendRequest(&$postData) {
+    private function sendRequest($postData) {
 
         $postStr = '';
         foreach ($postData as $key => $value) {
